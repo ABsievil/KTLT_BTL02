@@ -38,6 +38,7 @@ protected:
     Node *head;
     Node *lastHead;
 public:
+    virtual ~BaseBag(){}
     virtual bool insertFirst(BaseItem * item);
     virtual BaseItem * get(ItemType itemType);
     virtual string toString() const;
@@ -46,8 +47,6 @@ public:
     /* LIST: */
     Node *getHead(){return head;}
     Node *getLastHead(){return lastHead;}
-    // int getSize(){return size;}
-    // void setSize(int size){this->size= size;}
     void deleteFirst() {
         if (head != NULL) {
             Node* temp = head;
@@ -180,6 +179,7 @@ public:
     ~BaseKnight();
     static BaseKnight * create(int id, int maxhp, int level, int gil, int antidote, int phoenixdownI){
         BaseKnight *ptr=new BaseKnight(id,maxhp,level,gil,antidote,phoenixdownI);
+        return ptr;
     }
     void setBaseBag(BaseKnight *knight);
 
@@ -208,21 +208,15 @@ public:
     void setLevel(int newLevel) { 
         level = newLevel; 
         if(level>10) level=10;
-        }
+    }
     void setGil(int newGil) { 
         gil = newGil; 
         if(gil>999) gil=999;
-        }
-    void setAntidote(int newAntidote) { 
-        antidote = newAntidote; 
-        if(antidote>5) antidote=5;  //nhớ check ngoài hàm số thuốc thừa trước khi gọi hàm này giống setgil
-        }
-    void setPhoenixDownI(int newPhoenixDownI) { 
-        phoenixdownI = newPhoenixDownI; 
-        if(phoenixdownI>5) phoenixdownI=5;  //nhớ check ngoài hàm số thuốc thừa trước khi gọi hàm này giống setgil
     }
     float setKnightBaseDamage(KnightType knightType);
-    void setPoisonAntidote(bool logic){this->poisonAntidote=logic;}
+    void setPoisonAntidote(bool logic){
+        this->poisonAntidote=logic;
+    }
 };
 
 class ArmyKnights {
@@ -245,25 +239,12 @@ public:
     ~ArmyKnights();
     bool fight ( BaseOpponent *opponent );
     bool adventure (Events * events);
-    
-    BaseKnight * lastKnight() const;
 
-    bool hasPaladinShield() const{
-          if(paladinShield==1) return true;
-          else return false;
-    };    
-    bool hasLancelotSpear() const{
-          if(lancelotSpear==1) return true;
-          else return false;
-    }; 
-    bool hasGuinevereHair() const{
-          if(guinevereHair==1) return true;
-          else return false;
-    };
-    bool hasExcaliburSword() const{
-          if(excaliburSword==1) return true;
-          else return false;
-    };
+    BaseKnight * lastKnight() const;
+    bool hasPaladinShield() const;
+    bool hasLancelotSpear() const;
+    bool hasGuinevereHair() const;
+    bool hasExcaliburSword() const;
     
     int count() const { return countArmy; }
     void printInfo() const;
@@ -279,7 +260,7 @@ public:
     bool setEvent_10(BaseKnight *access);
     bool setEvent_11(BaseKnight *access);
     bool setEvent_99(BaseOpponent *opponent);
-    bool setEventPhoenixdown(BaseItem *item,BaseKnight *access); 
+    void setEventPhoenixdown(BaseItem *item,BaseKnight *access); 
 };
 
 class BaseItem {
@@ -343,7 +324,7 @@ public:
  
     void loadArmyKnights(const string &);
     void loadEvents(const string &);
-   void run();
+    void run();
 };
 
 #endif // __KNIGHT2_H__

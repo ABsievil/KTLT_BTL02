@@ -58,7 +58,6 @@ BaseItem *BaseBag::get(ItemType itemType) {
     }
 }
 string BaseBag::toString() const {
-    // Bag[count=<c>;<list_items>]
     string Antidote="Antidote", 
     PhoenixI="PhoenixI",
     PhoenixII="PhoenixII", 
@@ -89,7 +88,7 @@ void BaseBag::destructorList(){
         delete current;
         current = next;
         }
-    }
+}
 
 BagOfPaladin::BagOfPaladin(int a,int b,BaseKnight *knight){
     this->a=a;
@@ -104,7 +103,7 @@ bool BagOfPaladin::addFirst(ItemType value){
     size++;
     return true;
 }
-BagOfPaladin::~BagOfPaladin(){
+BagOfPaladin::~BagOfPaladin(){ 
     destructorList();
 }
 
@@ -138,7 +137,7 @@ bool BagOfDragon::addFirst(ItemType value) {
     else return false;
 }
 BagOfDragon::~BagOfDragon(){
-    destructorList();
+    destructorList(); 
 }
 
 BagOfNormal::BagOfNormal(int a,int b,BaseKnight *knight){
@@ -179,7 +178,6 @@ BagOfNormal::~BagOfNormal(){
         knight->getBag()->deleteFirst();
         // edit propeties knight
         knight->setHp(knight->getMaxHp());
-        knight->setPhoenixDownI((knight->getPhoenixDownI()-1));
     }
     ItemType PhoenixDownI::getType(){
         type=PHOENIXDOWNI;
@@ -256,7 +254,6 @@ BagOfNormal::~BagOfNormal(){
         type=PHOENIXDOWNIV;
         return type;
     }
-
 /* * * END implementation of class BaseItem * * */
 
 
@@ -332,9 +329,7 @@ float BaseKnight::setKnightBaseDamage(KnightType knightType){
     else if(knightType==PALADIN) return 0.06;
     else if(knightType==DRAGON) return 0.075;
 }
-
 /* * * END implementation of class BaseKnight * * */
-
 
 
 /* * * BEGIN implementation of class ArmyKnights * * */
@@ -382,6 +377,22 @@ BaseKnight * ArmyKnights::lastKnight() const{
     if(count()>=1) return knight[idLastKnight];
     else return NULL;
 }
+bool ArmyKnights::hasPaladinShield() const{
+          if(paladinShield==1) return true;
+          else return false;
+};    
+bool ArmyKnights::hasLancelotSpear() const{
+        if(lancelotSpear==1) return true;
+        else return false;
+}; 
+bool ArmyKnights::hasGuinevereHair() const{
+        if(guinevereHair==1) return true;
+        else return false;
+};
+bool ArmyKnights::hasExcaliburSword() const{
+        if(excaliburSword==1) return true;
+        else return false;
+};
 
 bool ArmyKnights::setEvent_1to5(int level,int levelO,BaseOpponent *opponent,BaseKnight *access){
     Monster_1to5 *monster= static_cast<Monster_1to5*>(opponent);
@@ -561,7 +572,7 @@ bool ArmyKnights::setEvent_99(BaseOpponent *opponent){
         int ct_count = count();
         while(ct_count-i>=0){
             if( knight[ct_count-i]->getKnightType()==PALADIN ||
-                knight[ct_count-i]->getKnightType()==LANCELOT ||
+                knight[ct_count-i]->getKnightType()==LANCELOT||
                 knight[ct_count-i]->getKnightType()==DRAGON){ 
                   BaseKnight *access= knight[ct_count-i]; 
                   int level=access->getLevel();
@@ -586,7 +597,7 @@ bool ArmyKnights::setEvent_99(BaseOpponent *opponent){
     }
 }
 
-bool ArmyKnights::setEventPhoenixdown(BaseItem *newitem,BaseKnight *access){
+void ArmyKnights::setEventPhoenixdown(BaseItem *newitem,BaseKnight *access){
      if( access->getBag()->insertFirst(newitem) ==false ){
          int i=2;
          while(count()-i>=0){
@@ -667,12 +678,11 @@ bool ArmyKnights::fight(BaseOpponent *opponent){
         setEventPhoenixdown(newitem,access);
         delete newitem;
     }
-
   return true;  
 }
 
 bool ArmyKnights::adventure (Events * events){
-    for(int i=0;i<events->count();i++){  //cout<<i+1<<" "<<events->get(i)<<"  "; //NHỚ XÓA
+    for(int i=0;i<events->count();i++){
         eventPresent=events->get(i);
         BaseOpponent *opponent=nullptr; 
         if( events->get(i)==1 ||
