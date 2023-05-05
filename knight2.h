@@ -139,25 +139,65 @@ public:
 class BaseOpponent{  //lớp trừu tượng của đối thủ
 protected:
     int levelO;
+    int gil, damage;
 public:
     int getLevelO(){return levelO;}   
+    int getGil(){return gil;}
+    int getDamage(){return damage;}
 
+    void setBase(int i,int event);
+    int gilMonster(int);
+    int BaseDamage(int);
 };
-class Monster_1to5:public BaseOpponent{
+class MadBear:public BaseOpponent{
 public:
-     Monster_1to5(int i,int event);
-     int gilMonster(int);
-     int BaseDamage(int);
+     MadBear(int i,int event){
+        setBase(i,event);
+     }
+}; 
+class Bandit:public BaseOpponent{
+public:
+      Bandit(int i,int event){
+        setBase(i,event);
+     }
 
+}; 
+class LordLupin:public BaseOpponent{
+public: 
+      LordLupin(int i,int event){
+        setBase(i,event);
+     }
 };
-class Monster_6and7:public BaseOpponent{
+class Elf:public BaseOpponent{
 public:
-     Monster_6and7(int i,int event);
-};
-class Monster_99:public BaseOpponent{
+       Elf(int i,int event){
+        setBase(i,event);
+     }
+}; 
+class Troll:public BaseOpponent{
+public:
+       Troll(int i,int event){
+        setBase(i,event);
+     }
+     
+}; 
+class Tornbery:public BaseOpponent{
+public: 
+     Tornbery(int i,int event);
+}; 
+class QueenOfCards:public BaseOpponent{
+public:
+     QueenOfCards(int i,int event);
+}; 
+class NinaDeRings:public BaseOpponent{}; 
+class DurianGarden:public BaseOpponent{}; 
+class OmegaWeapon:public BaseOpponent{}; 
+class Hades:public BaseOpponent{}; 
+class Ultimecia:public BaseOpponent{
 private:
-     int HP=5000;
-public:     
+     int HP;
+public:
+      Ultimecia();   
       void setHP(int HP){this->HP=HP;}
       int getHP(){return HP;}
 };
@@ -174,21 +214,18 @@ protected:
     KnightType knightType;
     int phoenixdownI;
     bool poisonAntidote=false;
-public:
-    BaseKnight(int id, int maxhp, int level, int gil, int antidote, int phoenixdownI);
-    ~BaseKnight();
-    static BaseKnight * create(int id, int maxhp, int level, int gil, int antidote, int phoenixdownI){
-        BaseKnight *ptr=new BaseKnight(id,maxhp,level,gil,antidote,phoenixdownI);
-        return ptr;
-    }
+public:;
+    virtual ~BaseKnight(){};
+    static BaseKnight * create(int id, int maxhp, int level, int gil, int antidote, int phoenixdownI);
     void setBaseBag(BaseKnight *knight);
+    void setProperties(int id, int maxhp, int level, int gil, int antidote, int phoenixdownI);
 
     string toString() const;
  
     /*check type knight first game*/
-    int set_KnightType(int HP);
-    bool check_Snt(int );
-    bool check_NumPythagoras(int HP);
+    static int set_KnightType(int HP);
+    static bool check_Snt(int );
+    static bool check_NumPythagoras(int HP);
     
     /* GET SET: */
     int getMaxHp() const { return maxhp; }
@@ -218,6 +255,26 @@ public:
         this->poisonAntidote=logic;
     }
 };
+class PaladinKnight:public BaseKnight{
+public:
+     PaladinKnight(int id, int maxhp, int level, int gil, int antidote, int phoenixdownI);    
+     ~PaladinKnight(){delete bag;}
+};
+class LancelotKnight:public BaseKnight{
+public:
+     LancelotKnight(int id, int maxhp, int level, int gil, int antidote, int phoenixdownI);  
+     ~LancelotKnight(){delete bag;}
+}; 
+class DragonKnight:public BaseKnight{
+public:
+     DragonKnight(int id, int maxhp, int level, int gil, int antidote, int phoenixdownI);  
+     ~DragonKnight(){delete bag;}
+};
+class NormalKnight:public BaseKnight{
+public:
+     NormalKnight(int id, int maxhp, int level, int gil, int antidote, int phoenixdownI);  
+     ~NormalKnight(){delete bag;}
+};
 
 class ArmyKnights {
 private:
@@ -225,15 +282,17 @@ private:
     int countArmy;
     int idLastKnight;
     BaseKnight **knight; 
+
     bool paladinShield=0,
     lancelotSpear=0,
     guinevereHair=0,
     excaliburSword=0;  
+
     int numTreasure=0;  
     bool passOmegaWeapon=0, 
     passHades=0;
-    int eventPresent;
 
+    int eventPresent;
 public:
     ArmyKnights (const string & file_armyknights);
     ~ArmyKnights();
@@ -251,10 +310,10 @@ public:
     void printResult(bool win) const;
 
     bool setEvent_1to5(int level,int levelO,BaseOpponent *opponent,BaseKnight *access);
-    void increaseGil(Monster_1to5 *monster,BaseKnight *access);
+    void increaseGil(BaseOpponent *opponent,BaseKnight *access);
     bool HPrecovery(BaseKnight *access);
-    bool setEvent_6(int level,int levelO,BaseOpponent *opponent,BaseKnight *access);
-    void setEvent_7(int level,int levelO,BaseOpponent *opponent,BaseKnight *access);
+    bool setEvent_6(int level,int levelO,BaseKnight *access);
+    void setEvent_7(int level,int levelO,BaseKnight *access);
     void increaseGil(BaseKnight *access);
     void setEvent_8(BaseKnight *access);
     bool setEvent_10(BaseKnight *access);

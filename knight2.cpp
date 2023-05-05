@@ -274,25 +274,20 @@ string BaseKnight::toString() const {
     return s;
 }
 
-BaseKnight::BaseKnight(int id, int maxhp, int level, int gil, int antidote, int phoenixdownI){
-    this->id=id;
-    this->hp=maxhp;
-    this->maxhp=maxhp;
-    this->level=level;
-    this->gil=gil;
-    this->antidote=antidote;
-    this->phoenixdownI=phoenixdownI;
-    this->knightType=static_cast<KnightType>(set_KnightType(maxhp));
-}
-BaseKnight::~BaseKnight(){
-    delete bag;
-}
 void BaseKnight::setBaseBag(BaseKnight *knight){
     if(knightType==PALADIN) bag= new BagOfPaladin(phoenixdownI,antidote,knight); 
     else if(knightType==LANCELOT) bag=new BagOfLancelot(phoenixdownI,antidote,knight); 
     else if(knightType==DRAGON) bag= new BagOfDragon(phoenixdownI,antidote,knight); 
     else if(knightType==NORMAL) bag= new BagOfNormal(phoenixdownI,antidote,knight); 
     phoenixdownI=0;antidote=0;
+}
+BaseKnight * BaseKnight::create(int id, int maxhp, int level, int gil, int antidote, int phoenixdownI){
+    BaseKnight *ptr;
+    if(set_KnightType(maxhp)==0){ptr = new PaladinKnight(id,maxhp,level,gil,antidote,phoenixdownI);}
+    else if(set_KnightType(maxhp)==1){ptr = new LancelotKnight(id,maxhp,level,gil,antidote,phoenixdownI);}
+    else if(set_KnightType(maxhp)==2){ptr = new DragonKnight(id,maxhp,level,gil,antidote,phoenixdownI);}
+    else if(set_KnightType(maxhp)==3){ptr = new NormalKnight(id,maxhp,level,gil,antidote,phoenixdownI);}
+    return ptr;
 }
 
 int BaseKnight::set_KnightType(int HP){
@@ -303,11 +298,11 @@ int BaseKnight::set_KnightType(int HP){
 }
 bool BaseKnight::check_Snt(int n){
     int count=0;
-     for(int i=1;i<=n;i++){
-        if(n%i==0) count++;
-     }
-     if(count==2) return true;
-     else return false;
+    for(int i=1;i<=n;i++){
+    if(n%i==0) count++;
+    }
+    if(count==2) return true;
+    else return false;
 }
 bool BaseKnight::check_NumPythagoras(int HP){
     if(100<=HP && HP<=999){
@@ -328,6 +323,32 @@ float BaseKnight::setKnightBaseDamage(KnightType knightType){
     if(knightType==LANCELOT) return 0.05;
     else if(knightType==PALADIN) return 0.06;
     else if(knightType==DRAGON) return 0.075;
+}
+void BaseKnight::setProperties(int id, int maxhp, int level, int gil, int antidote, int phoenixdownI){
+    this->id=id;
+    this->hp=maxhp;
+    this->maxhp=maxhp;
+    this->level=level;
+    this->gil=gil;
+    this->antidote=antidote;
+    this->phoenixdownI=phoenixdownI;
+}
+
+PaladinKnight::PaladinKnight(int id, int maxhp, int level, int gil, int antidote, int phoenixdownI){
+    setProperties(id,maxhp,level,gil,antidote,phoenixdownI);
+    this->knightType=PALADIN;
+}
+LancelotKnight::LancelotKnight(int id, int maxhp, int level, int gil, int antidote, int phoenixdownI){
+    setProperties(id,maxhp,level,gil,antidote,phoenixdownI);
+    this->knightType=LANCELOT;
+}
+DragonKnight::DragonKnight(int id, int maxhp, int level, int gil, int antidote, int phoenixdownI){
+    setProperties(id,maxhp,level,gil,antidote,phoenixdownI);
+    this->knightType=DRAGON;
+}
+NormalKnight::NormalKnight(int id, int maxhp, int level, int gil, int antidote, int phoenixdownI){
+    setProperties(id,maxhp,level,gil,antidote,phoenixdownI);
+    this->knightType=NORMAL;
 }
 /* * * END implementation of class BaseKnight * * */
 
@@ -395,27 +416,26 @@ bool ArmyKnights::hasExcaliburSword() const{
 };
 
 bool ArmyKnights::setEvent_1to5(int level,int levelO,BaseOpponent *opponent,BaseKnight *access){
-    Monster_1to5 *monster= static_cast<Monster_1to5*>(opponent);
     if(level>=levelO || (access->getKnightType()== LANCELOT) || (access->getKnightType()== PALADIN) ){ 
-         increaseGil(monster,access); 
+         increaseGil(opponent,access); 
          return true; 
     }
     else { 
-        int HP=(access->getHp())-(monster->BaseDamage(eventPresent))*(levelO-level);
+        int HP=(access->getHp())-(opponent->getDamage())*(levelO-level);
         access->setHp(HP);
         if(HPrecovery(access)) return true;
         else return false;   
     }
 }
-void ArmyKnights::increaseGil(Monster_1to5 *monster,BaseKnight *access){
-    if( (access->getGil()+monster->gilMonster(eventPresent))>999 ){
-        int change=access->getGil()+monster->gilMonster(eventPresent)-999;  //tính tiền thừa
-        access->setGil(access->getGil()+ monster->gilMonster(eventPresent));  // cộng tiền vào
+void ArmyKnights::increaseGil(BaseOpponent *opponent,BaseKnight *access){
+    if( (access->getGil()+ opponent->getGil() )>999 ){
+        int change=access->getGil()+opponent->getGil()-999;  //tính tiền thừa
+        access->setGil(access->getGil()+ opponent->getGil());  // cộng tiền vào
         int i=2;
         while(change>0 && count()-i>=0){
             BaseKnight *access2= knight[count()-i];
             if( (access2->getGil()+change)>999){
-                    int change2=access2->getGil()+ change -999; // do hàng dưới nên k thể uploat change trực tiếp
+                    int change2=access2->getGil()+ change -999; // tiền thừa mới
                     access2->setGil(access2->getGil()+change);
                     change=change2;
                     i++;
@@ -427,7 +447,7 @@ void ArmyKnights::increaseGil(Monster_1to5 *monster,BaseKnight *access){
         }
     }
     else{
-        access->setGil(access->getGil()+ monster->gilMonster(eventPresent));
+        access->setGil(access->getGil()+ opponent->getGil() );
     }
 }
 bool ArmyKnights::HPrecovery(BaseKnight *access){
@@ -436,18 +456,18 @@ bool ArmyKnights::HPrecovery(BaseKnight *access){
     bool valueCanUse= false;
     BaseItem *item=nullptr;
     do{    
-        if(item !=NULL){delete item;item=nullptr;} 
+        if(item !=nullptr){delete item;item=nullptr;} 
         ItemType findPhoenixdown = access->getBag()->findPhoenixdown(start);  //find fist phoenixdown
         if(findPhoenixdown != NULLITEMTYPE) {
             item= access->getBag()->get(findPhoenixdown);  // create new item in function get of class BaseBag 
             valueCanUse=item->canUse(access); 
         }       
-        if( item!=NULL && (valueCanUse== true) ){ 
+        if( item!=nullptr && (valueCanUse== true) ){ 
             item->use(access);
         }
         start= access->getBag()->getLastHead();
     }while( item !=NULL && (valueCanUse == false) && (start!=NULL) ); // nếu tìm thấy thuốc nhưng ko sử dụng được và thuốc đấy không phải là viên cái cuối cùng trong linkedlist thì tìm tiếp
-    if(item !=NULL) {delete item;item=nullptr;}
+    if(item !=nullptr) {delete item;item=nullptr;}
         
     //bước 2:
     if( ((access->getHp()<=0 )) && (access->getGil()>=100) ){
@@ -458,7 +478,7 @@ bool ArmyKnights::HPrecovery(BaseKnight *access){
   return true;  
 }
 
-bool ArmyKnights::setEvent_6(int level,int levelO,BaseOpponent *opponent,BaseKnight *access){
+bool ArmyKnights::setEvent_6(int level,int levelO,BaseKnight *access){
     if(level>=levelO){
           access->setLevel(access->getLevel()+1);
     }
@@ -482,7 +502,7 @@ bool ArmyKnights::setEvent_6(int level,int levelO,BaseOpponent *opponent,BaseKni
   return true;  
 }
 
-void ArmyKnights::setEvent_7(int level,int levelO,BaseOpponent *opponent,BaseKnight *access){
+void ArmyKnights::setEvent_7(int level,int levelO,BaseKnight *access){
     if(level>=levelO){
         increaseGil(access);
     }
@@ -565,7 +585,7 @@ bool ArmyKnights::setEvent_11(BaseKnight *access){
 }
 
 bool ArmyKnights::setEvent_99(BaseOpponent *opponent){
-    Monster_99 *monster= static_cast<Monster_99*>(opponent);
+    Ultimecia *ultimecia= static_cast<Ultimecia*>(opponent);
     if(excaliburSword==1 ) return true;
     if(numTreasure==3){
         int i=1;
@@ -576,9 +596,11 @@ bool ArmyKnights::setEvent_99(BaseOpponent *opponent){
                 knight[ct_count-i]->getKnightType()==DRAGON){ 
                   BaseKnight *access= knight[ct_count-i]; 
                   int level=access->getLevel();
-                  int damage= (access->getHp())*level*(access->setKnightBaseDamage(access->getKnightType()));
-                  monster->setHP( (monster->getHP())-damage );// cout<<"HP NU HOANG:"<<monster->getHP()<<endl;
-                  if(monster->getHP()<=0 ) return true; 
+                  int hp=access->getHp();
+                  float knightBaseDamage= access->setKnightBaseDamage(access->getKnightType());
+                  int damage= (float)hp*(float)level*knightBaseDamage;
+                  ultimecia->setHP( (ultimecia->getHP())-damage );
+                  if(ultimecia->getHP()<=0 ) return true; 
                   access->setHp(0);
                   
                   if(ct_count-i==count()-1) {idLastKnight--;}
@@ -598,14 +620,14 @@ bool ArmyKnights::setEvent_99(BaseOpponent *opponent){
 }
 
 void ArmyKnights::setEventPhoenixdown(BaseItem *newitem,BaseKnight *access){
-     if( access->getBag()->insertFirst(newitem) ==false ){
-         int i=2;
-         while(count()-i>=0){
-              BaseKnight *access2= knight[count()-i];
-              if(access2->getBag()->insertFirst(newitem)) break;
-              else i++;
-         }
-     }
+    if( access->getBag()->insertFirst(newitem) ==false ){
+        int i=2;
+        while(count()-i>=0){
+            BaseKnight *access2= knight[count()-i];
+            if(access2->getBag()->insertFirst(newitem)) break;
+            else i++;
+        }
+    }
 }
 
 bool ArmyKnights::fight(BaseOpponent *opponent){
@@ -622,12 +644,12 @@ bool ArmyKnights::fight(BaseOpponent *opponent){
     //event 6: gặp ma Tornbery
     else if(eventPresent==6){   
         int levelO=opponent->getLevelO();
-        if(setEvent_6(level,levelO,opponent,access)==false) return false;
+        if(setEvent_6(level,levelO,access)==false) return false;
     }
     //event 7: gặp nữ hoàng cờ bạc Queen of Cards
     else if(eventPresent==7){   
         int levelO=opponent->getLevelO();
-        setEvent_7(level,levelO,opponent,access);
+        setEvent_7(level,levelO,access);
     }
     //event 8: gặp lái buôn vui tính Nina de Rings
     else if(eventPresent==8){
@@ -685,21 +707,25 @@ bool ArmyKnights::adventure (Events * events){
     for(int i=0;i<events->count();i++){
         eventPresent=events->get(i);
         BaseOpponent *opponent=nullptr; 
-        if( events->get(i)==1 ||
-            events->get(i)==2 ||
-            events->get(i)==3 ||
-            events->get(i)==4 ||
-            events->get(i)==5 )    {opponent= new Monster_1to5(i,events->get(i));}
-        else if(events->get(i)==6 ||
-                events->get(i)==7 ){opponent= new Monster_6and7(i,events->get(i));}
-        else if(events->get(i)==99){opponent= new Monster_99;}
+        if     ( events->get(i)==1 ) { opponent= new MadBear(i,1);     }
+        else if( events->get(i)==2 ) { opponent= new Bandit(i,2);      }
+        else if( events->get(i)==3 ) { opponent= new LordLupin(i,3);   }
+        else if( events->get(i)==4 ) { opponent= new Elf(i,4);         }
+        else if( events->get(i)==5 ) { opponent= new Troll(i,5);       }
+        else if( events->get(i)==6 ) { opponent= new Tornbery(i,6);    }
+        else if( events->get(i)==7 ) { opponent= new QueenOfCards(i,7);}
+        else if( events->get(i)==8 ) { opponent= new NinaDeRings;      }
+        else if( events->get(i)==9 ) { opponent= new DurianGarden;     }
+        else if( events->get(i)==10) { opponent= new OmegaWeapon;      }
+        else if( events->get(i)==11) { opponent= new Hades;            }
+        else if( events->get(i)==99) { opponent= new Ultimecia();      }
         
         //RUN CODE:
         if(events->get(i)== 99){
             fight(opponent);
         }
         else{
-            while( fight(opponent) ==false ){
+            while( fight(opponent) == false ){
                 if(count()>1){
                     idLastKnight--;
                     countArmy--;
@@ -728,7 +754,6 @@ bool ArmyKnights::adventure (Events * events){
 /* * * END implementation of class ArmyKnights * * */
 
 
-
 /* * * BEGIN implementation of class KnightAdventure * * */
 KnightAdventure::KnightAdventure() {
     armyKnights = nullptr;
@@ -750,7 +775,6 @@ void KnightAdventure::run(){
     armyKnights->printResult(armyKnights->adventure(events));
 }
 /* * * END implementation of class KnightAdventure * * */
-
 
 
 /* * * BEGIN implementation of class Events * * */
@@ -783,10 +807,7 @@ int Events::get(int i) const{
 
 
 /* * * BEGIN implementation of class BaseOpponent * * */
-Monster_1to5::Monster_1to5(int i, int event){
-    this->levelO=(i+event)%10+1;
-}
-int Monster_1to5::gilMonster(int eventNum) {
+int BaseOpponent::gilMonster(int eventNum) {
     if (eventNum == 1) {
         return 100;
     }
@@ -803,7 +824,7 @@ int Monster_1to5::gilMonster(int eventNum) {
         return 800;
     }
 }
-int Monster_1to5::BaseDamage(int eventNum) {
+int BaseOpponent::BaseDamage(int eventNum) {
     if (eventNum == 1) {
         return 10;
     }
@@ -820,8 +841,19 @@ int Monster_1to5::BaseDamage(int eventNum) {
         return 95;
     }
 }
-
-Monster_6and7::Monster_6and7(int i,int event){
+void BaseOpponent::setBase(int i,int event){
     this->levelO=(i+event)%10+1;
+    gil= gilMonster(event);
+    damage= BaseDamage(event);   
+}
+
+Tornbery::Tornbery(int i,int event){
+    this->levelO=(i+event)%10+1;
+}
+QueenOfCards::QueenOfCards(int i,int event){
+    this->levelO=(i+event)%10+1;
+}
+Ultimecia::Ultimecia(){
+    this->HP=5000;
 }
 /* * * END implementation of class BaseOpponent * * */
